@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Tables\Filters\Filter;
 
 class TaskResource extends Resource
 {
@@ -46,14 +47,30 @@ class TaskResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('project.name'),
-                TextColumn::make('name'),
-                TextColumn::make('start_date')->date(),
-                TextColumn::make('end_date')->date(),
+                TextColumn::make('project.name')->searchable(),
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('start_date')->date()->sortable()->searchable(),
+                TextColumn::make('end_date')->date()->sortable()->searchable(),
                 TextColumn::make('status'),
             ])
             ->filters([
-                // Add filters for sorting and searching
+                Filter::make('status1')
+                    ->label('Status "ToDo"')
+                    ->query(fn (Builder $query): Builder => $query->where('status', 'ToDo')),
+                Filter::make('status2')
+                    ->label('Status "In Progress"')
+                    ->query(fn (Builder $query): Builder => $query->where('status', 'In Progress')),
+                Filter::make('status3')
+                    ->label('Status "Done"')
+                    ->query(fn (Builder $query): Builder => $query->where('status', 'Done')),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
 

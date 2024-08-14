@@ -13,9 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
-// use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\TextInput;
-// use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Select;
 
 class UserResource extends Resource
 {
@@ -34,12 +34,13 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-                // Select::make('role')
-                //     ->options([
-                //         'admin' => 'Admin',
-                //         'user' => 'User',
-                //     ])
-                //     ->required(),
+                Select::make('is_admin')
+                    ->label('Role')
+                    ->options([
+                        '1' => 'Admin',
+                        '0' => 'User',
+                    ])
+                    ->required(),
                 TextInput::make('password')
                     ->password()
                     ->required()
@@ -55,14 +56,40 @@ class UserResource extends Resource
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('name')->sortable()->searchable(),
                 TextColumn::make('email')->sortable()->searchable(),
+                TextColumn::make('is_admin')
+                    ->label('Role')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        return $state === 0 ? 'User' : 'Admin';
+                    }),
                 // TextColumn::make('role')->sortable()->searchable(),
                 TextColumn::make('created_at')->dateTime()->sortable(),
             ])
+            // ->filters([
+            //     Filter::make('admin')
+            //         ->query(fn (Builder $query): Builder => $query->where('is_admin', '1')),
+            //     Filter::make('user')
+            //         ->query(fn (Builder $query): Builder => $query->where('is_admin', '0')),
+            // ])
             ->filters([
-                // Filter::make('admin')
-                //     ->query(fn (Builder $query): Builder => $query->where('role', 'admin')),
-                // Filter::make('user')
-                //     ->query(fn (Builder $query): Builder => $query->where('role', 'user')),
+                Filter::make('admin')
+                    ->query(function (Builder $query, $state): Builder {
+                        if ($state) {
+                            $query->orWhere('is_admin', '1');
+                        }
+                        return $query;
+                    })
+                    ->toggle(),
+
+                Filter::make('user')
+                    ->query(function (Builder $query, $state): Builder {
+                        if ($state) {
+                            $query->orWhere('is_admin', '0');
+                        }
+                        return $query;
+                    })
+                    ->toggle(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
