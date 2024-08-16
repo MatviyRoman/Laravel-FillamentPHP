@@ -48,10 +48,10 @@ class TaskResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('project.name')->searchable(),
-                TextColumn::make('name')->searchable(),
+                TextColumn::make('name')->sortable()->searchable(),
                 TextColumn::make('start_date')->date()->sortable()->searchable(),
                 TextColumn::make('end_date')->date()->sortable()->searchable(),
-                TextColumn::make('status'),
+                TextColumn::make('status')->sortable(),
             ])
             ->filters([
                 Filter::make('status1')

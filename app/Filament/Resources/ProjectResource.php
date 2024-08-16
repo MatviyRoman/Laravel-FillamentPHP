@@ -38,9 +38,9 @@ class ProjectResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('start_date')->date(),
-                TextColumn::make('end_date')->date(),
+                TextColumn::make('name')->sortable(),
+                TextColumn::make('start_date')->sortable()->date(),
+                TextColumn::make('end_date')->sortable()->date(),
             ])
             ->filters([
                 // Add filters for sorting and searching
